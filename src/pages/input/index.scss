@@ -1,0 +1,197 @@
+/* ── Logo 头部 ──────────────── */
+.logo-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 36rpx;
+}
+
+.cat-photo {
+  width: 220rpx;
+  height: 220rpx;
+  border-radius: 32rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 8rpx 40rpx rgba(180, 90, 60, 0.25);
+}
+
+.logo-title {
+  display: block;
+  font-size: 52rpx;
+  font-weight: 700;
+  color: #7a3520;
+  text-align: center;
+  margin-bottom: 8rpx;
+}
+
+.logo-subtitle {
+  display: block;
+  font-size: 28rpx;
+  color: rgba(61, 28, 10, 0.55);
+  text-align: center;
+  margin-bottom: 0;
+}
+
+.input-page {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #f5ece0, #fdf6ee);
+  padding: 48rpx 32rpx 80rpx;
+}
+
+.page-title {
+  display: block;
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #3d1c0a;
+  text-align: center;
+  margin-bottom: 12rpx;
+}
+
+.page-subtitle {
+  display: block;
+  font-size: 28rpx;
+  color: rgba(61, 28, 10, 0.55);
+  text-align: center;
+  margin-bottom: 48rpx;
+}
+
+.form-card {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(185, 110, 80, 0.22);
+  border-radius: 24rpx;
+  padding: 40rpx 32rpx;
+  box-shadow: 0 2px 14px rgba(180, 90, 60, 0.08);
+}
+
+.field-group {
+  margin-bottom: 36rpx;
+}
+
+.field-label {
+  display: block;
+  font-size: 28rpx;
+  color: rgba(61, 28, 10, 0.65);
+  margin-bottom: 12rpx;
+}
+
+.field-input {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(185, 110, 80, 0.28);
+  border-radius: 14rpx;
+  padding: 22rpx 24rpx;
+  color: #3d1c0a;
+  font-size: 30rpx;
+  width: 100%;
+  min-height: 80rpx;
+  box-sizing: border-box;
+  line-height: 1.4;
+}
+
+.date-row {
+  display: flex;
+  gap: 16rpx;
+}
+
+.date-part {
+  flex: 1;
+  min-width: 0;
+  font-size: 28rpx;
+  padding: 22rpx 16rpx;
+}
+
+/* ── 地区选择器 ──────────── */
+.picker-display {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(185, 110, 80, 0.28);
+  border-radius: 14rpx;
+  padding: 20rpx 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.picker-text {
+  font-size: 30rpx;
+  color: #3d1c0a;
+  flex: 1;
+}
+
+.picker-placeholder {
+  color: rgba(61, 28, 10, 0.4);
+}
+
+.picker-arrow {
+  font-size: 40rpx;
+  color: rgba(61, 28, 10, 0.35);
+  font-weight: 300;
+  line-height: 1;
+}
+
+.error-text {
+  display: block;
+  color: #f87171;
+  font-size: 26rpx;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.submit-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #c97b6e, #e8a882) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 999rpx !important;
+  padding: 28rpx !important;
+  font-size: 34rpx !important;
+  font-weight: 600 !important;
+  margin-top: 8rpx;
+}
+
+.submit-btn[disabled] {
+  opacity: 0.5 !important;
+}
+
+/* ── 占星术语开关 ──────────────── */
+.astro-toggle {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 20rpx 24rpx;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(185, 110, 80, 0.2);
+  border-radius: 16rpx;
+  margin-top: 24rpx;
+  margin-bottom: 8rpx;
+}
+
+.toggle-switch {
+  width: 88rpx;
+  height: 48rpx;
+  border-radius: 24rpx;
+  background: rgba(61, 28, 10, 0.15);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.toggle-on {
+  background: #c97b6e;
+}
+
+.toggle-knob {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: #fff;
+  position: absolute;
+  top: 4rpx;
+  left: 4rpx;
+}
+
+.toggle-on .toggle-knob {
+  left: 44rpx;
+}
+
+.toggle-label {
+  font-size: 30rpx;
+  color: #3d1c0a;
+  font-weight: 500;
+}

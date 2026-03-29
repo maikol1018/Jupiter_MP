@@ -1,0 +1,134 @@
+/* 全局样式 */
+page {
+  background-color: #1a0a2e;
+  color: #e8d5b7;
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  box-sizing: border-box;
+}
+
+/* 通用卡片 */
+.card {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 220, 150, 0.2);
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+}
+
+/* 渐变标题 */
+.gradient-title {
+  background: linear-gradient(135deg, #f6d365, #fda085);
+  -webkit-background-clip: text;
+  color: transparent;
+  font-weight: 700;
+}
+
+/* 主按钮 */
+.btn-primary {
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  color: #fff;
+  border: none;
+  border-radius: 999rpx;
+  padding: 24rpx 48rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  text-align: center;
+}
+
+.btn-primary[disabled] {
+  opacity: 0.5;
+}
+
+/* 次级按钮 */
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e8d5b7;
+  border: 1px solid rgba(255, 220, 150, 0.3);
+  border-radius: 999rpx;
+  padding: 20rpx 40rpx;
+  font-size: 28rpx;
+  text-align: center;
+}
+
+/* 输入框 */
+.input-field {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 220, 150, 0.3);
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+  color: #e8d5b7;
+  font-size: 32rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* loading 旋转 */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+/* 报告内容区域 */
+.report-text {
+  font-size: 30rpx;
+  line-height: 1.9;
+  letter-spacing: 0.03em;
+  color: #e8d5b7;
+}
+
+/* ── 底部导航栏 ── */
+.page-root {
+  position: relative;
+  min-height: 100vh;
+  background: linear-gradient(160deg, #f5ece0, #fdf6ee);
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 110rpx;
+  background: rgba(253, 246, 238, 0.96);
+  border-top: 1px solid rgba(185, 110, 80, 0.18);
+  display: flex;
+  align-items: center;
+  z-index: 100;
+  box-shadow: 0 -2px 14px rgba(180, 90, 60, 0.1);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rpx;
+  padding: 10rpx 0;
+}
+
+.nav-icon {
+  font-size: 38rpx;
+}
+
+.nav-label {
+  font-size: 22rpx;
+  color: rgba(61, 28, 10, 0.4);
+  line-height: 1.2;
+}
+
+.nav-item-active .nav-label {
+  color: #7a3520;
+  font-weight: 600;
+}
+
+.nav-dot {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: #c97b6e;
+  margin-top: 4rpx;
+}

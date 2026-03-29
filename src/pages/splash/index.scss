@@ -1,0 +1,44 @@
+.splash-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64rpx 48rpx;
+  background: #1a0a2e;
+}
+
+.lines-container {
+  display: flex;
+  flex-direction: column;
+  gap: 40rpx;
+  width: 100%;
+  max-width: 640rpx;
+}
+
+.splash-line {
+  font-size: 34rpx;
+  line-height: 1.9;
+  color: #e8d5b7;
+  font-family: "PingFang SC", serif;
+  text-align: center;
+  white-space: pre-line;
+  animation: fadeInUp 1.5s ease-in-out;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.start-btn {
+  margin-top: 80rpx;
+  background: linear-gradient(135deg, #a855f7, #ec4899) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 999rpx !important;
+  padding: 24rpx 80rpx !important;
+  font-size: 32rpx !important;
+  font-weight: 600 !important;
+  animation: fadeInUp 1s ease-in-out;
+}
