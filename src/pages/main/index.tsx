@@ -78,7 +78,6 @@ export default function MainPage() {
           { label: '公司合盘', icon: '🏢', url: '/pages/consult/index?tab=company' },
           { label: '跳槽分析', icon: '🚀', url: '/pages/consult/index?tab=jobhop' },
           { label: '合伙人', icon: '🤝', url: '/pages/consult/index?tab=partner' },
-          { label: '求一卦', icon: '🎲', url: '/pages/consult/index?tab=dice' },
         ].map(item => (
           <View
             key={item.label}

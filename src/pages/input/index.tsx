@@ -97,13 +97,24 @@ const cityCoords: Record<string, { lat: number; lon: number }> = {
   '台湾省': { lat: 25.0330, lon: 121.5654 },
 };
 
+const yearRange = Array.from({ length: 80 }, (_, i) => 1950 + i);
+const monthRange = Array.from({ length: 12 }, (_, i) => i + 1);
+const dayRange = Array.from({ length: 31 }, (_, i) => i + 1);
+const hourRange = Array.from({ length: 24 }, (_, i) => i);
+const minuteRange = Array.from({ length: 60 }, (_, i) => i);
+
+const dateColumns = [yearRange.map(v => v + '年'), monthRange.map(v => v + '月'), dayRange.map(v => v + '日')];
+const timeColumns = [hourRange.map(v => String(v).padStart(2, '0') + '时'), minuteRange.map(v => String(v).padStart(2, '0') + '分')];
+
 export default function InputPage() {
   const [name, setName] = useState('');
-  const [year, setYear] = useState('1990');
-  const [month, setMonth] = useState('1');
-  const [day, setDay] = useState('1');
-  const [hour, setHour] = useState('12');
-  const [minute, setMinute] = useState('0');
+  const [year, setYear] = useState(1990);
+  const [month, setMonth] = useState(1);
+  const [day, setDay] = useState(1);
+  const [hour, setHour] = useState(12);
+  const [minute, setMinute] = useState(0);
+  const [dateIdx, setDateIdx] = useState([yearRange.indexOf(1990), 0, 0]);
+  const [timeIdx, setTimeIdx] = useState([12, 0]);
   const [city, setCity] = useState('上海市');
   const [lat, setLat] = useState('31.2304');
   const [lon, setLon] = useState('121.4737');
@@ -124,14 +135,40 @@ export default function InputPage() {
     setLon(coords.lon.toString());
   };
 
+  const handleDateChange = (e: any) => {
+    const vals: number[] = e.detail.value;
+    setDateIdx(vals);
+    setYear(yearRange[vals[0]]);
+    setMonth(monthRange[vals[1]]);
+    setDay(dayRange[vals[2]]);
+  };
+
+  const handleDateColumnChange = (e: any) => {
+    const { column, value } = e.detail;
+    const newIdx = [...dateIdx];
+    newIdx[column] = value;
+    setDateIdx(newIdx);
+  };
+
+  const handleTimeChange = (e: any) => {
+    const vals: number[] = e.detail.value;
+    setTimeIdx(vals);
+    setHour(hourRange[vals[0]]);
+    setMinute(minuteRange[vals[1]]);
+  };
+
+  const handleTimeColumnChange = (e: any) => {
+    const { column, value } = e.detail;
+    const newIdx = [...timeIdx];
+    newIdx[column] = value;
+    setTimeIdx(newIdx);
+  };
+
   const handleSubmit = async () => {
     setError('');
     if (!city) { setError('请填写出生城市或选择城市'); return; }
-    const y = parseInt(year), m = parseInt(month), d = parseInt(day);
-    const h = parseInt(hour), min = parseInt(minute);
-    if (isNaN(y) || isNaN(m) || isNaN(d) || isNaN(h)) {
-      setError('请填写完整的出生日期和时间'); return;
-    }
+    const y = year, m = month, d = day;
+    const h = hour, min = minute;
 
     setLoading(true);
     try {
@@ -170,11 +207,11 @@ export default function InputPage() {
           mode="aspectFill"
         />
         <Text className="logo-title">木星小女巫</Text>
-        <Text className="logo-subtitle">陪伴你的商业占星顾问</Text>
+        <Text className="logo-subtitle">陪伴你的商业小秘书</Text>
       </View>
 
       <Text className="page-title">输入出生信息</Text>
-      <Text className="page-subtitle">木星需要这些信息来为你解读命运</Text>
+      <Text className="page-subtitle">木星需要这些信息来为你提供参考</Text>
 
       <View className="form-card">
         <View className="field-group">
@@ -189,19 +226,34 @@ export default function InputPage() {
 
         <View className="field-group">
           <Text className="field-label">出生年月日</Text>
-          <View className="date-row">
-            <Input className="field-input date-part" placeholder="年" type="number" value={year} onInput={e => setYear(e.detail.value)} />
-            <Input className="field-input date-part" placeholder="月" type="number" value={month} onInput={e => setMonth(e.detail.value)} />
-            <Input className="field-input date-part" placeholder="日" type="number" value={day} onInput={e => setDay(e.detail.value)} />
-          </View>
+          <Picker
+            mode="multiSelector"
+            range={dateColumns}
+            value={dateIdx}
+            onChange={handleDateChange}
+            onColumnChange={handleDateColumnChange}
+          >
+            <View className="picker-display">
+              <Text className="picker-text">{year}年 {month}月 {day}日</Text>
+              <Text className="picker-arrow">›</Text>
+            </View>
+          </Picker>
         </View>
 
         <View className="field-group">
           <Text className="field-label">出生时间</Text>
-          <View className="date-row">
-            <Input className="field-input date-part" placeholder="时" type="number" value={hour} onInput={e => setHour(e.detail.value)} />
-            <Input className="field-input date-part" placeholder="分" type="number" value={minute} onInput={e => setMinute(e.detail.value)} />
-          </View>
+          <Picker
+            mode="multiSelector"
+            range={timeColumns}
+            value={timeIdx}
+            onChange={handleTimeChange}
+            onColumnChange={handleTimeColumnChange}
+          >
+            <View className="picker-display">
+              <Text className="picker-text">{String(hour).padStart(2, '0')}时 {String(minute).padStart(2, '0')}分</Text>
+              <Text className="picker-arrow">›</Text>
+            </View>
+          </Picker>
         </View>
 
         <View className="field-group">
@@ -226,7 +278,7 @@ export default function InputPage() {
           <View className={`toggle-switch ${includeAstroTerms ? 'toggle-on' : ''}`}>
             <View className="toggle-knob" />
           </View>
-          <Text className="toggle-label">包含占星术语</Text>
+          <Text className="toggle-label">包含 ⭐符号</Text>
         </View>
 
         <Button

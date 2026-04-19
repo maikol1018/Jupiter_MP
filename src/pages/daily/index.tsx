@@ -3,6 +3,7 @@ import Taro, { useLoad } from '@tarojs/taro';
 import { useState } from 'react';
 import { BirthData, NatalData } from '../../types';
 import { generateDailyWorkReport } from '../../services/geminiService';
+import ChatBox from '../../components/ChatBox';
 import './index.scss';
 
 // 简单的 Markdown 转普通文本渲染（小程序不支持 DOM）
@@ -147,6 +148,11 @@ export default function DailyPage() {
           </View>
         )}
       </View>
+
+      {/* 问与答 */}
+      {currentReport && !loading && (
+        <ChatBox reportContent={currentReport} />
+      )}
 
       {/* 深度解读入口 */}
       <View

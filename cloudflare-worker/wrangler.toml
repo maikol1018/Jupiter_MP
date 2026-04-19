@@ -1,0 +1,9 @@
+name = "jupiter-relay"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+GEMINI_MODEL = "gemini-3-flash-preview"
+AUTH_KEY = "jupiter-2026"
+
+# GEMINI_API_KEY 通过 wrangler secret 设置（不放在配置文件里）

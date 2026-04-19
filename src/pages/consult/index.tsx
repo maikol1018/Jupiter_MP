@@ -11,6 +11,7 @@ import {
   generateAstroDiceReading,
   generateDeepAstroDiceReading,
 } from '../../services/geminiService';
+import ChatBox from '../../components/ChatBox';
 import './index.scss';
 
 // ── Markdown 渲染 ──────────────────────────────
@@ -282,15 +283,15 @@ function DicePanel() {
 
   return (
     <View className="dice-container">
-      <Text className="form-title">🎲 求一卦</Text>
+      <Text className="form-title">獲取指引</Text>
       <Text className="form-subtitle">专治各种选不出来、找不到、拿不定主意</Text>
-      <Text className="form-subtitle-2">轻轻一掷骰子，神庙的古老启示，即将为你揭晓答案</Text>
+      <Text className="form-subtitle-2">轻轻一掷投子，神庙的古老启示，即将为你揭晓答案</Text>
 
       <Textarea className="dice-textarea" value={question} onInput={e => setQuestion(e.detail.value)} placeholder="输入具体问题（如：这笔投资会获利吗？）" maxlength={200} />
 
       {question.trim() && !result && (
         <View className="dice-reminder">
-          <Text className="dice-reminder-text">🙏 掷骰子前，请在心中默念自己的问题</Text>
+          <Text className="dice-reminder-text">🙏 掷投子前，请在心中默念自己的问题</Text>
         </View>
       )}
 
@@ -310,7 +311,7 @@ function DicePanel() {
       </View>
 
       <Button className="submit-btn" loading={rolling} disabled={rolling} onClick={roll}>
-        {rolling ? '星象运转中...' : '掷出骰子'}
+        {rolling ? '星象运转中...' : '掷出投子'}
       </Button>
 
       {analysis && (
@@ -346,6 +347,11 @@ function DicePanel() {
           </View>
         </View>
       )}
+
+      {/* 问与答 - 骰子解读后 */}
+      {(reading || deepReading) && !rolling && (
+        <ChatBox reportContent={[reading, deepReading].filter(Boolean).join('\n\n')} />
+      )}
     </View>
   );
 }
@@ -365,7 +371,6 @@ export default function ConsultPage() {
     { key: 'company', label: '🏢 公司合盘' },
     { key: 'jobhop', label: '🚀 跳槽分析' },
     { key: 'partner', label: '🤝 合伙人' },
-    { key: 'dice', label: '🎲 求一卦' },
   ];
 
   const handleTabChange = (key: string | null) => {
@@ -426,7 +431,7 @@ export default function ConsultPage() {
       icon: '🧳',
       iconBg: '#ede9f7',
       title: '我要不要跳槽？',
-      desc: '公司也是个生命体，也有自己的性格命运，看看你和这家公司合不合？',
+      desc: '公司也是个生命体，也有自己的性格，看看你和这家公司合不合？',
     },
     {
       key: 'partner',
@@ -442,13 +447,6 @@ export default function ConsultPage() {
       title: '我想看看我公司今年的发展情况',
       desc: '今年适合融资吗？',
     },
-    {
-      key: 'dice',
-      icon: '🎲',
-      iconBg: '#fdf0e5',
-      title: '求一卦',
-      desc: '轻轻一掷骰子，神庙的古老启示为你揭晓答案',
-    },
   ];
 
   return (
@@ -460,7 +458,7 @@ export default function ConsultPage() {
           <View>
             <View className="consult-hero">
               <Text className="consult-hero-title">遇事不决，找木星</Text>
-              <Text className="consult-hero-desc">我的前世是埃及神庙的大祭司，和一般的占星师相比，我特别擅长处理商业问题，遇事不决，找我木星吧。</Text>
+              <Text className="consult-hero-desc">我是来自埃及的小猫，擅长用星象数据分析商业问题，遇事不决，找我木星吧。</Text>
             </View>
             {menuItems.map(item => (
               <View key={item.key} className="consult-menu-item" onClick={() => handleTabChange(item.key)}>
@@ -500,28 +498,26 @@ export default function ConsultPage() {
           <PartnerForm onSubmit={handlePartnerSubmit} loading={loading} />
         )}
 
-        {/* 求一卦 */}
-        {tab === 'dice' && <DicePanel />}
-
       {/* 报告显示区域（公司/跳槽/合伙人共用） */}
-      {tab !== 'dice' && report && (
+      {report && (
         <View className="report-section">
           <View className="markdown-content">{renderMarkdown(report)}</View>
           <View className="disclaimer-bar">
             <Text className="disclaimer-text">✨ 本报告仅供娱乐，不构成任何建议，请理性看待</Text>
           </View>
+          <ChatBox reportContent={report} />
           <Button className="reset-btn" onClick={() => { setReport(''); setReportError(''); }}>重新生成</Button>
         </View>
       )}
 
-      {tab !== 'dice' && reportError && (
+      {reportError && (
         <View className="error-box">
           <Text className="error-text">{reportError}</Text>
           <Button className="reset-btn" onClick={() => { setReport(''); setReportError(''); }}>重试</Button>
         </View>
       )}
 
-      {loading && tab !== 'dice' && (
+      {loading && (
         <View className="loading-overlay">
           <Text className="loading-icon spinning">✦</Text>
           <Text className="loading-text">木星正在观测星象...</Text>

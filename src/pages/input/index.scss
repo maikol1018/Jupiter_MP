@@ -74,6 +74,7 @@
 }
 
 .field-input {
+  display: block;
   background: rgba(255, 255, 255, 0.65);
   border: 1px solid rgba(185, 110, 80, 0.28);
   border-radius: 14rpx;
@@ -84,18 +85,21 @@
   min-height: 80rpx;
   box-sizing: border-box;
   line-height: 1.4;
+  overflow: visible;
 }
 
 .date-row {
   display: flex;
-  gap: 16rpx;
+  gap: 12rpx;
 }
 
 .date-part {
   flex: 1;
   min-width: 0;
-  font-size: 28rpx;
-  padding: 22rpx 16rpx;
+  font-size: 26rpx;
+  padding: 22rpx 8rpx;
+  text-align: center;
+  box-sizing: border-box;
 }
 
 /* ── 地区选择器 ──────────── */

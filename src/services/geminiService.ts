@@ -44,15 +44,15 @@ export const generateAnnualReport = async (
   const progressionDataStr = progressions.map(p => `  - ${p.name}: ${formatDegree(p.lon)}`).join('\n');
 
   const prompt = `
-作为一名专业的占星师，请根据以下用户的本命星盘数据，为他们生成一份关于"${category}"的 ${year}年 年度分析报告。
+请根据以下用户的本命星盘数据，为他们生成一份关于"${category}"的 ${year}年 年度复盘分析报告。
 ${getLangInstruction(includeAstrologyTerms)}
 请注意：
 1. 语言风格尽量符合年轻人，轻松、有共鸣，但不要浮夸或过度娱乐化。
 2. 结合本命盘的主要特征（如太阳、月亮、上升星座，以及主要相位）。
-3. 结合 ${year} 年的重要行运星象（Transit，如木星、土星换座，日月食等）对该用户本命盘的影响。
+3. 结合 ${year} 年的重要行运星象（Transit，如木星、土星换座，日月食等）对该用户本命盘的影响，作为参考视角。
 4. 结合 ${year} 年的次限盘（Secondary Progression）重要推运事件（如次限月亮过宫、次限太阳换座、次限行星与本命行星形成重要相位等）。
-5. 综合行运盘（Transit）和次限盘（Progression），如果两者在 ${year} 年同时触发了相同的主题或相位（双重强调的事件），请务必重点指出并详细分析其带来的重大影响。
-6. 给出实用的建议。
+5. 综合行运盘（Transit）和次限盘（Progression），如果两者在 ${year} 年同时触发了相同的主题或相位（双重强调的事件），请务必重点指出并详细分析其带来的参考意义。
+6. 给出实用的行动建议，定位为「行为参考」而非预测。
 7. 务必严格基于下方提供的行运盘和次限盘星体度数进行分析，切勿自行推演或编造星体位置。
 8. 描述星盘宫位时，请统一使用"宫"字，例如"第6宫"、"6宫"，绝对不要使用"室"字（如"6室"）。
 
@@ -102,11 +102,11 @@ ${getLangInstruction(includeAstrologyTerms)}
 请注意：
 1. 语言风格专业、实用、有洞察力。
 2. 核心分析内容必须包含，且请严格按照以下顺序排版：
-   - **运势概览**：给予一个不超过120字的建议。重点给予「内在情绪」或「亲密关系」方面的建议。请暗中运用"行为建议、心理感受、价值升华"的逻辑来撰写，但绝对不要在文本中明写出这些词汇。
+   - **心灵气象站**：给予一个不超过120字的建议。重点给予「内在情绪」或「亲密关系」方面的建议。请暗中运用"行为建议、心理感受、价值升华"的逻辑来撰写，但绝对不要在文本中明写出这些词汇。
    - **穿衣指南**：参考五行穿衣和当天星象，给出穿衣建议。必须明确分为5档：最佳、次佳、平平、较差、避免。对于提到的所有颜色，请务必在颜色名称后面加上对应颜色的圆形emoji。
 3. 务必严格基于下方提供的当前行运盘星体度数与本命盘的互动进行分析。
 4. 描述星盘宫位时，请统一使用"宫"字，绝对不要使用"室"字。
-5. 第一行必须直接是"**运势概览**"，不要输出任何问候语或开场白。
+5. 第一行必须直接是"**心灵气象站**"，不要输出任何问候语或开场白。
 
 个人出生信息：
 ${userBirthConfig.name ? `- 姓名：${userBirthConfig.name}` : ''}
@@ -124,10 +124,10 @@ ${transitDataStr}
 请直接输出报告内容，使用Markdown格式。
 `;
 
-  const sysInst = getNoTermsSystemInst(includeAstrologyTerms, "你只输出运势分析的正文，第一行必须直接是'**运势概览**'。");
+  const sysInst = getNoTermsSystemInst(includeAstrologyTerms, "你只输出分析的正文，第一行必须直接是'**心灵气象站**'。");
   let text = await callGemini({ prompt, systemInstruction: sysInst, temperature: 0.2 });
 
-  const overviewIndex = text.indexOf('**运势概览**');
+  const overviewIndex = text.indexOf('**心灵气象站**');
   if (overviewIndex > 0) text = text.substring(overviewIndex);
 
   mpStorage.setItem(cacheKey, text);

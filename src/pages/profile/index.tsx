@@ -3,6 +3,7 @@ import Taro, { useDidShow } from '@tarojs/taro';
 import { useState } from 'react';
 import { BirthData, NatalData } from '../../types';
 import { generateAnnualReport } from '../../services/geminiService';
+import ChatBox from '../../components/ChatBox';
 import './index.scss';
 
 function renderMarkdown(text: string) {
@@ -42,7 +43,7 @@ export default function ProfilePage() {
   const [birthConfig, setBirthConfig] = useState<BirthData | null>(null);
   const [natalData, setNatalData] = useState<NatalData | null>(null);
   const [reportYear, setReportYear] = useState(new Date().getFullYear());
-  const [reportCategory, setReportCategory] = useState('综合运势');
+  const [reportCategory, setReportCategory] = useState('人生剧本');
   const [reportContent, setReportContent] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -53,8 +54,9 @@ export default function ProfilePage() {
     else Taro.redirectTo({ url: '/pages/input/index' });
   });
 
-  const categories = ['综合运势', '事业财富', '爱情感情', '健康身心', '人际贵人'];
-  const years = [new Date().getFullYear(), new Date().getFullYear() + 1, new Date().getFullYear() + 2];
+  const categories = ['人生剧本', '事业财富', '爱情感情', '健康身心', '人际贵人'];
+  const currentYear = new Date().getFullYear();
+  const years = [currentYear, currentYear - 1, currentYear - 2];
 
   const handleGenerate = async () => {
     if (!birthConfig || !natalData) return;
@@ -84,7 +86,7 @@ export default function ProfilePage() {
 
       {/* 年度报告 */}
       <View className="section-card">
-        <Text className="section-title">📖 年度人生剧本</Text>
+        <Text className="section-title">📖 年度复盘分析</Text>
 
         <Text className="field-label">选择年份</Text>
         <View className="chips-row">
@@ -105,7 +107,7 @@ export default function ProfilePage() {
         </View>
 
         <Button className="gen-btn" disabled={loading} onClick={handleGenerate}>
-          {loading ? '生成中...' : `生成 ${reportYear}年 ${reportCategory} 报告`}
+          {loading ? '生成中...' : `复盘 ${reportYear}年 ${reportCategory}`}
         </Button>
       </View>
 
@@ -114,7 +116,7 @@ export default function ProfilePage() {
         <View className="report-card">
           {loading ? (
             <View className="loading-box">
-              <Text className="loading-text">木星正在撰写你的人生剧本...</Text>
+              <Text className="loading-text">木星正在整理你的年度复盘...</Text>
             </View>
           ) : (
             <View>
@@ -125,6 +127,11 @@ export default function ProfilePage() {
             </View>
           )}
         </View>
+      )}
+
+      {/* 问与答 */}
+      {reportContent && !loading && (
+        <ChatBox reportContent={reportContent} />
       )}
       </ScrollView>
 
