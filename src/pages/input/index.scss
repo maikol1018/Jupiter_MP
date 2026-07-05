@@ -33,8 +33,47 @@
 
 .input-page {
   min-height: 100vh;
-  background: linear-gradient(160deg, #f5ece0, #fdf6ee);
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(201,123,110,0.22) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(232,168,130,0.18) 0%, transparent 50%),
+    linear-gradient(160deg, #f5ece0, #fdf6ee);
   padding: 48rpx 32rpx 80rpx;
+}
+
+/* ── 访问统计 ────────────────── */
+.visit-stats {
+  margin-top: 60rpx;
+  padding: 16rpx 24rpx;
+  display: flex;
+  justify-content: center;
+}
+
+.visit-stats-text {
+  font-size: 22rpx;
+  color: rgba(122, 53, 32, 0.45);
+  letter-spacing: 1rpx;
+  text-align: center;
+}
+
+/* ── 跳过履历 ──────────────── */
+.skip-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8rpx;
+}
+
+.skip-btn {
+  padding: 10rpx 24rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(185, 110, 80, 0.22);
+  font-size: 26rpx;
+  color: #7a3520;
+}
+
+.skip-btn Text {
+  color: #7a3520;
+  font-size: 26rpx;
 }
 
 .page-title {
@@ -52,6 +91,115 @@
   color: rgba(61, 28, 10, 0.55);
   text-align: center;
   margin-bottom: 48rpx;
+}
+
+/* ── 对话气泡 ──────────────── */
+.chat-stream {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+  margin-bottom: 32rpx;
+}
+
+.chat-row {
+  display: flex;
+  width: 100%;
+}
+
+.chat-row-assistant {
+  justify-content: flex-start;
+}
+
+.chat-row-user {
+  justify-content: flex-end;
+}
+
+.chat-bubble {
+  max-width: 78%;
+  padding: 20rpx 26rpx;
+  border-radius: 24rpx;
+  box-shadow: 0 2px 10rpx rgba(180, 90, 60, 0.08);
+}
+
+.chat-bubble-assistant {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(185, 110, 80, 0.22);
+  border-top-left-radius: 8rpx;
+}
+
+.chat-bubble-user {
+  background: linear-gradient(135deg, #c97b6e, #e8a882);
+  border-top-right-radius: 8rpx;
+}
+
+.chat-bubble-user .chat-text {
+  color: #fff;
+}
+
+.chat-bubble-assistant .chat-text {
+  color: #3d1c0a;
+}
+
+.chat-text {
+  font-size: 30rpx;
+  line-height: 1.7;
+}
+
+/* ── 当前步骤的输入区 ──────────────── */
+.chat-action {
+  margin-top: 8rpx;
+}
+
+.action-card {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(185, 110, 80, 0.22);
+  border-radius: 24rpx;
+  padding: 32rpx 28rpx;
+  box-shadow: 0 2px 14px rgba(180, 90, 60, 0.08);
+}
+
+.btn-row {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 24rpx;
+}
+
+.btn-primary,
+.btn-secondary {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22rpx;
+  border-radius: 999rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #a94838 0%, #c96f5f 52%, #e08b62 100%);
+  color: #fff;
+  border: 1rpx solid rgba(122, 53, 32, 0.18);
+  text-shadow: 0 2rpx 4rpx rgba(61, 28, 10, 0.22);
+  box-shadow: 0 10rpx 24rpx rgba(169, 72, 56, 0.2), inset 0 1rpx 0 rgba(255, 255, 255, 0.22);
+}
+
+.btn-primary Text {
+  color: #fff;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(185, 110, 80, 0.28);
+  color: #7a3520;
+}
+
+.btn-secondary Text {
+  color: #7a3520;
+}
+
+.btn-full {
+  flex: 1;
 }
 
 .form-card {
@@ -140,18 +288,46 @@
 
 .submit-btn {
   width: 100%;
-  background: linear-gradient(135deg, #c97b6e, #e8a882) !important;
+  background: linear-gradient(135deg, #7d2a1f 0%, #b44535 48%, #d8653f 100%) !important;
   color: #fff !important;
-  border: none !important;
+  border: 2rpx solid rgba(90, 34, 22, 0.28) !important;
   border-radius: 999rpx !important;
   padding: 28rpx !important;
   font-size: 34rpx !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
+  line-height: 1.45 !important;
   margin-top: 8rpx;
+  text-shadow: 0 3rpx 6rpx rgba(61, 28, 10, 0.34);
+  box-shadow: 0 14rpx 30rpx rgba(125, 42, 31, 0.34), inset 0 2rpx 0 rgba(255, 255, 255, 0.2);
 }
 
-.submit-btn[disabled] {
-  opacity: 0.5 !important;
+.submit-btn-ready {
+  background: linear-gradient(135deg, #7d2a1f 0%, #b44535 48%, #d8653f 100%) !important;
+  color: #fff !important;
+  border-color: rgba(90, 34, 22, 0.32) !important;
+  opacity: 1 !important;
+  box-shadow: 0 14rpx 30rpx rgba(125, 42, 31, 0.34), inset 0 2rpx 0 rgba(255, 255, 255, 0.2) !important;
+  text-shadow: 0 3rpx 6rpx rgba(61, 28, 10, 0.34) !important;
+}
+
+.submit-btn::after {
+  border: none !important;
+}
+
+.btn-primary:active,
+.submit-btn:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 6rpx 16rpx rgba(169, 72, 56, 0.18);
+}
+
+.submit-btn[disabled='true'],
+.submit-btn-loading {
+  background: linear-gradient(135deg, #9c817b, #c4aaa0) !important;
+  color: #fff !important;
+  opacity: 1 !important;
+  box-shadow: none;
+  text-shadow: none;
+  transform: none;
 }
 
 /* ── 占星术语开关 ──────────────── */
@@ -199,3 +375,151 @@
   color: #3d1c0a;
   font-weight: 500;
 }
+
+.profile-category-form {
+  margin-bottom: 24rpx;
+}
+
+.category-form-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #3d1c0a;
+  margin-bottom: 14rpx;
+}
+
+.category-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.category-chip {
+  padding: 10rpx 22rpx;
+  border-radius: 999rpx;
+  background: rgba(185, 110, 80, 0.1);
+  border: 1px solid rgba(185, 110, 80, 0.22);
+}
+
+.category-chip Text {
+  color: #7a3520;
+  font-size: 26rpx;
+}
+
+.category-chip-active {
+  background: linear-gradient(135deg, #c97b6e, #e8a882);
+  border-color: transparent;
+}
+
+.category-chip-active Text {
+  color: #fff;
+}
+
+.category-input {
+  margin-top: 0;
+}
+
+/* #ifdef h5 */
+.input-page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 20rpx 32rpx 28rpx;
+}
+
+.logo-header {
+  margin-bottom: 16rpx;
+}
+
+.cat-photo {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 20rpx;
+  margin-bottom: 10rpx;
+}
+
+.logo-title {
+  font-size: 42rpx;
+  margin-bottom: 2rpx;
+}
+
+.logo-subtitle {
+  font-size: 26rpx;
+}
+
+.page-title {
+  font-size: 40rpx;
+  margin-bottom: 6rpx;
+}
+
+.page-subtitle {
+  font-size: 26rpx;
+  line-height: 1.35;
+  margin-bottom: 18rpx;
+}
+
+.chat-stream {
+  gap: 10rpx;
+  margin-bottom: 14rpx;
+}
+
+.chat-bubble {
+  padding: 14rpx 18rpx;
+  border-radius: 18rpx;
+}
+
+.chat-text {
+  font-size: 32rpx;
+  line-height: 1.45;
+}
+
+.action-card {
+  padding: 18rpx;
+  border-radius: 18rpx;
+}
+
+.field-input {
+  min-height: 64rpx;
+  padding: 16rpx 20rpx;
+  font-size: 32rpx;
+}
+
+.picker-text {
+  font-size: 32rpx;
+}
+
+.btn-row {
+  gap: 12rpx;
+  margin-top: 14rpx;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 16rpx 18rpx;
+  border-radius: 18rpx;
+  font-size: 32rpx;
+  line-height: 1.2;
+}
+
+.visit-stats {
+  margin-top: 14rpx;
+  padding: 8rpx 14rpx;
+}
+
+.visit-stats-text {
+  font-size: 24rpx;
+}
+
+.category-form-title {
+  font-size: 30rpx;
+}
+
+.category-chip {
+  padding: 8rpx 18rpx;
+}
+
+.category-chip Text {
+  font-size: 26rpx;
+}
+
+/* #endif */

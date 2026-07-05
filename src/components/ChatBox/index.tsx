@@ -86,8 +86,11 @@ export default function ChatBox({ reportContent }: ChatBoxProps) {
   return (
     <View className="chatbox-container">
       <View className="chatbox-header">
-        <Text className="chatbox-title">💬 问与答</Text>
-        <Text className="chatbox-subtitle">对报告内容有疑问？向木星提问吧</Text>
+        <View className="chatbox-title-row">
+          <Text className="chatbox-title">问与答</Text>
+          <Text className="chatbox-ai-badge">AI生成</Text>
+        </View>
+        <Text className="chatbox-subtitle">本功能为深度合成 + AI问答，回答内容由AI生成，仅供娱乐参考。</Text>
       </View>
 
       {messages.length > 0 && (
@@ -96,7 +99,10 @@ export default function ChatBox({ reportContent }: ChatBoxProps) {
             <View key={i} id={`msg-${i}`} className={`chatbox-msg chatbox-msg-${msg.role}`}>
               <View className={`chatbox-bubble chatbox-bubble-${msg.role}`}>
                 {msg.role === 'assistant' ? (
-                  <View className="markdown-content">{renderMarkdown(msg.content)}</View>
+                  <View>
+                    <Text className="chatbox-message-ai-badge">AI生成</Text>
+                    <View className="markdown-content">{renderMarkdown(msg.content)}</View>
+                  </View>
                 ) : (
                   <Text className="chatbox-text">{msg.content}</Text>
                 )}
@@ -118,7 +124,7 @@ export default function ChatBox({ reportContent }: ChatBoxProps) {
           className="chatbox-input"
           value={inputValue}
           onInput={e => setInputValue(e.detail.value)}
-          placeholder="输入你的问题..."
+          placeholder="输入问题，AI将基于报告回答..."
           confirmType="send"
           onConfirm={handleSend}
           disabled={loading}

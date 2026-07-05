@@ -1,7 +1,7 @@
 import { BirthData, NatalData, Planet, ViewMode } from '../types';
 // @ts-ignore
 import * as Astronomy from 'astronomy-engine';
-const { Body, Equator, SiderealTime, MakeTime, Observer } = Astronomy;
+const { Body } = Astronomy;
 
 const API_BASE_URL = 'http://localhost:8000/api';
 
@@ -35,67 +35,52 @@ const r2d = (rad: number) => rad * R2D;
 // --- Core Astronomy Functions ---
 
 /**
- * Calculate Obliquity of Ecliptic (True) for a given Julian Day.
+ * Calculate Obliquity of Ecliptic (True) for Astronomy Engine J2000 days.
  * Uses IAU 2006 precession model approximation.
  */
-const calcTrueObliquity = (jd: number) => {
-  const T = (jd - 2451545.0) / 36525.0;
+const calcTrueObliquity = (j2000Days: number) => {
+  const T = j2000Days / 36525.0;
   const eps0 = 23.0 + 26.0/60.0 + 21.448/3600.0 - (46.8150/3600.0)*T - (0.00059/3600.0)*T*T + (0.001813/3600.0)*T*T*T;
   return eps0;
 };
 
 /**
- * Convert Equatorial Coordinates (RA, Dec) to Ecliptic Coordinates (Lon, Lat).
- * Both input and output in Degrees.
+ * Calculate the true lunar north node from the Moon's instantaneous orbit plane.
+ * The Moon state is rotated from EQJ to true ecliptic of date, then the node is
+ * the intersection of the osculating orbit plane and the ecliptic plane.
  */
-const equatorToEcliptic = (raDeg: number, decDeg: number, epsDeg: number) => {
-  const ra = d2r(raDeg);
-  const dec = d2r(decDeg);
-  const eps = d2r(epsDeg);
+const calcTrueNorthNode = (time: any) => {
+  const moonState = Astronomy.GeoMoonState(time);
+  const eclipticState = Astronomy.RotateState(Astronomy.Rotation_EQJ_ECT(time), moonState);
 
-  const sinLon = Math.sin(ra) * Math.cos(eps) + Math.tan(dec) * Math.sin(eps);
-  const cosLon = Math.cos(ra);
-  
-  const lon = r2d(Math.atan2(sinLon, cosLon));
-  
-  const sinLat = Math.sin(dec) * Math.cos(eps) - Math.cos(dec) * Math.sin(eps) * Math.sin(ra);
-  const lat = r2d(Math.asin(sinLat));
+  const hx = eclipticState.y * eclipticState.vz - eclipticState.z * eclipticState.vy;
+  const hy = eclipticState.z * eclipticState.vx - eclipticState.x * eclipticState.vz;
 
-  return { lon: normalize(lon), lat };
+  return normalize(r2d(Math.atan2(hx, -hy)));
 };
 
-/**
- * Calculate True North Node (Meeus / IAU).
- * More accurate than Mean Node.
- */
-const calcTrueNode = (jd: number) => {
-  const T = (jd - 2451545.0) / 36525.0;
-  
-  // Mean Elongation of Moon
-  const D = 297.85036 + 445267.111480 * T - 0.0019142 * T * T + T * T * T / 189474;
-  // Mean Anomaly of Sun
-  const M = 357.52772 + 35999.050340 * T - 0.0001603 * T * T - T * T * T / 300000;
-  // Mean Anomaly of Moon
-  const M_prime = 134.96298 + 477198.867398 * T + 0.0086972 * T * T + T * T * T / 56250;
-  // Argument of Latitude (Mean)
-  const F = 93.27191 + 483202.017538 * T - 0.0036825 * T * T + T * T * T / 327270;
-  // Mean Longitude of Ascending Node
-  const Omega = 125.04452 - 1934.136261 * T + 0.0020708 * T * T + T * T * T / 450000;
+const calcTrueNodePlanets = (time: any): Planet[] => {
+  const northNodeLon = calcTrueNorthNode(time);
+  const timeNext = time.AddDays ? time.AddDays(1 / 24) : Astronomy.MakeTime(new Date(time.date.getTime() + 3600000));
+  const northNodeNext = calcTrueNorthNode(timeNext);
+  let speed = northNodeNext - northNodeLon;
+  if (speed > 180) speed -= 360;
+  if (speed < -180) speed += 360;
 
-  const dr = Math.PI / 180;
-  const rD = D * dr;
-  const rM = M * dr;
-  const rMp = M_prime * dr;
-  const rF = F * dr;
+  return [
+    { name: 'North Node', lon: northNodeLon, speed },
+    { name: 'South Node', lon: normalize(northNodeLon + 180), speed },
+  ];
+};
 
-  // Corrections for True Node (Terms > 0.01 deg)
-  let dOmega = -1.4979 * Math.sin(2 * rD - 2 * rF)
-             - 0.1500 * Math.sin(rM)
-             - 0.1226 * Math.sin(2 * rD)
-             + 0.1176 * Math.sin(2 * rF)
-             - 0.0801 * Math.sin(2 * rMp);
-  
-  return normalize(Omega + dOmega);
+const calcBodyLongitude = (bodyId: any, time: any) => {
+  if (bodyId === Body.Moon) {
+    return normalize(Astronomy.EclipticGeoMoon(time).lon);
+  }
+
+  const vector = Astronomy.GeoVector(bodyId, time, true);
+  const ecliptic = Astronomy.Ecliptic(vector);
+  return normalize(ecliptic.elon);
 };
 
 // --- House System Logic ---
@@ -227,31 +212,25 @@ export const calculateProfessionalData = (data: BirthData): NatalData => {
   date.setTime(date.getTime() + gmtHour * 3600 * 1000);
 
   const astroTime = Astronomy.MakeTime(date);
-  const jd = astroTime.ut;
+  const j2000Days = astroTime.ut;
 
   // ═══ Step 3: 用星历表查行星星座及度数 (Geocentric Ecliptic) ═══
-  const eps = calcTrueObliquity(jd);
-  // 使用地心坐标 (Observer at 0,0,0 ≈ geocentric)
-  const geocentricObs = new Astronomy.Observer(0, 0, 0);
+  const eps = calcTrueObliquity(j2000Days);
 
   const planets: Planet[] = BODY_DEFINITIONS.map(b => {
-    const eq = Astronomy.Equator(b.id, astroTime, geocentricObs, true, true);
-    const ecl = equatorToEcliptic(eq.ra * 15, eq.dec, eps);
+    const lon = calcBodyLongitude(b.id, astroTime);
 
     const timeNext = Astronomy.MakeTime(new Date(date.getTime() + 3600000));
-    const eqNext = Astronomy.Equator(b.id, timeNext, geocentricObs, true, true);
-    const eclNext = equatorToEcliptic(eqNext.ra * 15, eqNext.dec, eps);
+    const lonNext = calcBodyLongitude(b.id, timeNext);
 
-    let speed = eclNext.lon - ecl.lon;
+    let speed = lonNext - lon;
     if (speed > 180) speed -= 360;
     if (speed < -180) speed += 360;
 
-    return { name: b.name, lon: ecl.lon, speed };
+    return { name: b.name, lon, speed };
   });
 
-  const northNodeLon = calcTrueNode(jd);
-  planets.push({ name: 'North Node', lon: northNodeLon, speed: 0 });
-  planets.push({ name: 'South Node', lon: normalize(northNodeLon + 180), speed: 0 });
+  planets.push(...calcTrueNodePlanets(astroTime));
 
   // ═══ Step 4: 格林威治恒星时(GMST) + 出生地经纬度 → 普拉西德斯(Placidus)宫位 ═══
   // GMST × 15 + 出生地经度 = RAMC (本地恒星时，度数)
@@ -261,7 +240,7 @@ export const calculateProfessionalData = (data: BirthData): NatalData => {
   const cusps = calculatePlacidus(ramc, data.lat, eps);
 
   return {
-    jd,
+    jd: j2000Days,
     planets,
     houses: { cusps, asc: cusps[1], mc: cusps[10] },
     angles: { ASC: cusps[1], MC: cusps[10] }
@@ -280,13 +259,11 @@ const calculateOverlayPlanets = (baseJd: number, date: Date, mode: ViewMode, nat
     
     const progDate = Astronomy.MakeTime(progJd);
     const eps = calcTrueObliquity(progJd);
-    const observer = new Astronomy.Observer(0, 0, 0); 
     
     const planets: Planet[] = BODY_DEFINITIONS.map(b => {
-      const eq = Astronomy.Equator(b.id, progDate, observer, true, true);
-      const ecl = equatorToEcliptic(eq.ra * 15, eq.dec, eps);
-      return { name: b.name, lon: ecl.lon, speed: 0 };
+      return { name: b.name, lon: calcBodyLongitude(b.id, progDate), speed: 0 };
     });
+    planets.push(...calcTrueNodePlanets(progDate));
     
     // Calculate Solar Arc MC
     const natalSun = natalData.planets.find(p => p.name === 'Sun')?.lon || 0;
@@ -313,14 +290,10 @@ const calculateOverlayPlanets = (baseJd: number, date: Date, mode: ViewMode, nat
   }
 
   // Default Transit mode
-  const eps = calcTrueObliquity(targetJd);
-  const observer = new Astronomy.Observer(0, 0, 0); 
-
   const planets: Planet[] = BODY_DEFINITIONS.map(b => {
-    const eq = Astronomy.Equator(b.id, targetTime, observer, true, true);
-    const ecl = equatorToEcliptic(eq.ra * 15, eq.dec, eps);
-    return { name: b.name, lon: ecl.lon, speed: 0 };
+    return { name: b.name, lon: calcBodyLongitude(b.id, targetTime), speed: 0 };
   });
+  planets.push(...calcTrueNodePlanets(targetTime));
 
   return planets;
 };

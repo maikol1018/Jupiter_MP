@@ -1,8 +1,11 @@
 import { View, Text, Input, Button, Image, Picker } from '@tarojs/components';
 const catAvatar = require('../../assets/cat-avatar.jpg');
 import Taro from '@tarojs/taro';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { fetchNatalChart } from '../../services/astroService';
+import { getVisitStats, VisitStats } from '../../services/apiService';
+import { DEFAULT_PROFILE_CATEGORIES, saveProfileRecord } from '../../services/profileService';
+import { CHINA_REGION_TREE, getDistrictOptions } from '../../services/chinaRegions';
 import { BirthData } from '../../types';
 import './index.scss';
 
@@ -54,6 +57,7 @@ const cityCoords: Record<string, { lat: number; lon: number }> = {
   '西宁市': { lat: 36.6232, lon: 101.7782 },
   '银川市': { lat: 38.4872, lon: 106.2309 },
   '呼和浩特市': { lat: 40.8426, lon: 111.7492 },
+  '赤峰市': { lat: 42.2578, lon: 118.8869 },
   '太原市': { lat: 37.8706, lon: 112.5489 },
   '石家庄市': { lat: 38.0428, lon: 114.5149 },
   '保定市': { lat: 38.8671, lon: 115.4644 },
@@ -106,6 +110,42 @@ const minuteRange = Array.from({ length: 60 }, (_, i) => i);
 const dateColumns = [yearRange.map(v => v + '年'), monthRange.map(v => v + '月'), dayRange.map(v => v + '日')];
 const timeColumns = [hourRange.map(v => String(v).padStart(2, '0') + '时'), minuteRange.map(v => String(v).padStart(2, '0') + '分')];
 
+const getRegionColumns = (idx: number[]) => {
+  const province = CHINA_REGION_TREE[idx[0]] || CHINA_REGION_TREE[0];
+  const city = province.cities[idx[1]] || province.cities[0];
+  return [
+    CHINA_REGION_TREE.map(item => item.name),
+    province.cities.map(item => item.name),
+    getDistrictOptions(city),
+  ];
+};
+
+const getRegionByIdx = (idx: number[]) => {
+  const province = CHINA_REGION_TREE[idx[0]] || CHINA_REGION_TREE[0];
+  const city = province.cities[idx[1]] || province.cities[0];
+  const districtOptions = getDistrictOptions(city);
+  const district = districtOptions[idx[2]] || districtOptions[0];
+  return { province: province.name, city: city.name, district };
+};
+
+const formatRegionLabel = (parts: string[]) => {
+  const [province, city, district] = parts;
+  return district && district !== city
+    ? [province, city, district].filter(Boolean).join(' ')
+    : [province, city].filter(Boolean).join(' ');
+};
+
+interface ChatMsg { role: 'assistant' | 'user'; content: string }
+
+const QUESTIONS = [
+  '可以告诉木星您怎么称呼吗？',
+  '请问您是哪一天生的？(阳历) (年月日)',
+  '具体几点几分呢？',
+  '出生在哪座城市呀？',
+  '希望木星回答时夹带星象符号吗？',
+];
+const FINAL_MSG = '星空档案已经建立好啦，准备好就可以开始解读～';
+
 export default function InputPage() {
   const [name, setName] = useState('');
   const [year, setYear] = useState(1990);
@@ -119,20 +159,134 @@ export default function InputPage() {
   const [lat, setLat] = useState('31.2304');
   const [lon, setLon] = useState('121.4737');
   const [region, setRegion] = useState<string[]>(['上海市', '上海市', '黄浦区']);
+  const [regionIdx, setRegionIdx] = useState([2, 0, 0]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [includeAstroTerms, setIncludeAstroTerms] = useState(() => {
-    try { return !!Taro.getStorageSync('includeAstrologyTerms'); } catch { return false; }
+    try { return !!Taro.getStorageSync('includeAstrologyTerms'); } catch (_error) { return false; }
   });
+  const [profileCategory, setProfileCategory] = useState(DEFAULT_PROFILE_CATEGORIES[0]);
+  const [categoryDraft, setCategoryDraft] = useState('');
+
+  const [step, setStep] = useState(0);
+  const [messages, setMessages] = useState<ChatMsg[]>([
+    { role: 'assistant', content: QUESTIONS[0] },
+  ]);
+  const [nameDraft, setNameDraft] = useState('');
+  const [visitStats, setVisitStats] = useState<VisitStats | null>(() => {
+    try {
+      const app: any = (typeof getApp === 'function' ? getApp() : null) || {};
+      return app.globalData?.visitStats || null;
+    } catch (_error) { return null; }
+  });
+  const regionColumns = getRegionColumns(regionIdx);
+
+  useEffect(() => {
+    if (visitStats) return;
+    getVisitStats()
+      .then(s => setVisitStats(s))
+      .catch(() => { /* 忽略 */ });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const advance = (userText: string) => {
+    setMessages(prev => {
+      const next = [...prev, { role: 'user' as const, content: userText }];
+      const nextStep = step + 1;
+      if (nextStep < QUESTIONS.length) {
+        next.push({ role: 'assistant', content: QUESTIONS[nextStep] });
+      } else {
+        next.push({ role: 'assistant', content: FINAL_MSG });
+      }
+      return next;
+    });
+    setStep(s => s + 1);
+  };
+
+  const handleNameConfirm = () => {
+    const v = nameDraft.trim();
+    setName(v);
+    advance(v ? v : '（暂不告知）');
+  };
+  const handleNameSkip = () => {
+    setName('');
+    setNameDraft('');
+    advance('（暂不告知）');
+  };
+  const handleDateConfirm = () => advance(`${year}年 ${month}月 ${day}日`);
+  const handleTimeConfirm = () =>
+    advance(`${String(hour).padStart(2, '0')}时 ${String(minute).padStart(2, '0')}分`);
+  const handleCityConfirm = () => {
+    const label = formatRegionLabel(region);
+    if (!label) { setError('请选择出生城市'); return; }
+    setCity(label);
+    setError('');
+    advance(label);
+  };
+  const handleAstroChoose = (on: boolean) => {
+    setIncludeAstroTerms(on);
+    Taro.setStorageSync('includeAstrologyTerms', on);
+    advance(on ? '希望包含' : '不用了');
+  };
+
+  const getFinalCategory = () => categoryDraft.trim() || profileCategory;
+
+  const handleSkipResume = async () => {
+    if (loading) return;
+    setError('');
+    setLoading(true);
+    Taro.showLoading({ title: '计算星盘中...', mask: true });
+    try {
+      const birthConfig: BirthData = {
+        year, month, day,
+        hour: hour + minute / 60,
+        minute,
+        lat: parseFloat(lat),
+        lon: parseFloat(lon),
+        city,
+        timezone: 8,
+        name: name || undefined,
+      };
+      const natalData = await fetchNatalChart(birthConfig);
+      saveProfileRecord(birthConfig, natalData, getFinalCategory());
+      Taro.setStorageSync('includeAstrologyTerms', includeAstroTerms);
+      Taro.hideLoading();
+      Taro.reLaunch({ url: '/packageA/pages/daily/index' });
+    } catch (e: any) {
+      Taro.hideLoading();
+      setError('星盘计算失败：' + (e.message || '请稍后再试'));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleRegionChange = (e: any) => {
-    const val: string[] = e.detail.value;
-    setRegion(val);
-    const cityName = val[1] || val[0] || '';
-    setCity(cityName);
-    const coords = cityCoords[cityName] || cityCoords[val[0]] || { lat: 31.2304, lon: 121.4737 };
+    const val: number[] = e.detail.value;
+    const selected = getRegionByIdx(val);
+    const provinceName = selected.province;
+    const cityName = selected.city;
+    const label = formatRegionLabel([selected.province, selected.city, selected.district]);
+    const coords = cityCoords[cityName] || cityCoords[provinceName] || { lat: 31.2304, lon: 121.4737 };
+    setRegionIdx(val);
+    setRegion([selected.province, selected.city, selected.district]);
+    setCity(label || cityName);
     setLat(coords.lat.toString());
     setLon(coords.lon.toString());
+    setError('');
+  };
+
+  const handleRegionColumnChange = (e: any) => {
+    const { column, value } = e.detail;
+    const nextIdx = [...regionIdx];
+    nextIdx[column] = value;
+    if (column === 0) {
+      nextIdx[1] = 0;
+      nextIdx[2] = 0;
+    }
+    if (column === 1) {
+      nextIdx[2] = 0;
+    }
+    setRegionIdx(nextIdx);
   };
 
   const handleDateChange = (e: any) => {
@@ -187,10 +341,9 @@ export default function InputPage() {
         name: name || undefined,
       };
       const natalData = await fetchNatalChart(birthConfig);
-      Taro.setStorageSync('birthConfig', birthConfig);
-      Taro.setStorageSync('natalData', natalData);
+      saveProfileRecord(birthConfig, natalData, getFinalCategory());
       Taro.setStorageSync('includeAstrologyTerms', includeAstroTerms);
-      Taro.redirectTo({ url: '/pages/daily/index' });
+      Taro.redirectTo({ url: '/packageA/pages/daily/index' });
     } catch (e: any) {
       setError('星盘计算失败：' + (e.message || '请稍后再试'));
     } finally {
@@ -210,85 +363,169 @@ export default function InputPage() {
         <Text className="logo-subtitle">陪伴你的商业小秘书</Text>
       </View>
 
-      <Text className="page-title">输入出生信息</Text>
-      <Text className="page-subtitle">木星需要这些信息来为你提供参考</Text>
+      <Text className="page-title">建立星空档案</Text>
+      <Text className="page-subtitle">木星需要这些信息来为你提供专属建议</Text>
 
-      <View className="form-card">
-        <View className="field-group">
-          <Text className="field-label">姓名（可选）</Text>
-          <Input
-            className="field-input"
-            placeholder="你的名字"
-            value={name}
-            onInput={e => setName(e.detail.value)}
-          />
-        </View>
-
-        <View className="field-group">
-          <Text className="field-label">出生年月日</Text>
-          <Picker
-            mode="multiSelector"
-            range={dateColumns}
-            value={dateIdx}
-            onChange={handleDateChange}
-            onColumnChange={handleDateColumnChange}
-          >
-            <View className="picker-display">
-              <Text className="picker-text">{year}年 {month}月 {day}日</Text>
-              <Text className="picker-arrow">›</Text>
+      <View className="chat-stream">
+        {messages.map((m, i) => (
+          <View key={i} className={`chat-row chat-row-${m.role}`}>
+            <View className={`chat-bubble chat-bubble-${m.role}`}>
+              <Text className="chat-text">{m.content}</Text>
             </View>
-          </Picker>
-        </View>
-
-        <View className="field-group">
-          <Text className="field-label">出生时间</Text>
-          <Picker
-            mode="multiSelector"
-            range={timeColumns}
-            value={timeIdx}
-            onChange={handleTimeChange}
-            onColumnChange={handleTimeColumnChange}
-          >
-            <View className="picker-display">
-              <Text className="picker-text">{String(hour).padStart(2, '0')}时 {String(minute).padStart(2, '0')}分</Text>
-              <Text className="picker-arrow">›</Text>
-            </View>
-          </Picker>
-        </View>
-
-        <View className="field-group">
-          <Text className="field-label">出生地点</Text>
-          <Picker
-            mode="region"
-            value={region}
-            onChange={handleRegionChange}
-          >
-            <View className="picker-display">
-              <Text className={`picker-text${region[0] ? '' : ' picker-placeholder'}`}>
-                {region[0] ? region.join(' ') : '请选择出生地点'}
-              </Text>
-              <Text className="picker-arrow">›</Text>
-            </View>
-          </Picker>
-        </View>
-
-        {error ? <Text className="error-text">{error}</Text> : null}
-
-        <View className="astro-toggle" onClick={() => { setIncludeAstroTerms(!includeAstroTerms); Taro.setStorageSync('includeAstrologyTerms', !includeAstroTerms); }}>
-          <View className={`toggle-switch ${includeAstroTerms ? 'toggle-on' : ''}`}>
-            <View className="toggle-knob" />
           </View>
-          <Text className="toggle-label">包含 ⭐符号</Text>
-        </View>
-
-        <Button
-          className="submit-btn"
-          disabled={loading}
-          onClick={handleSubmit}
-        >
-          {loading ? '计算星盘中...' : '开始解读 ✨'}
-        </Button>
+        ))}
+        {error ? (
+          <Text className="error-text">{error}</Text>
+        ) : null}
       </View>
+
+      <View className="chat-action">
+        {step === 0 && (
+          <View className="action-card">
+            <Input
+              className="field-input"
+              placeholder="你的名字"
+              value={nameDraft}
+              onInput={e => setNameDraft(e.detail.value)}
+              confirmType="done"
+              onConfirm={handleNameConfirm}
+            />
+            <View className="btn-row">
+              <View className="btn-secondary" onClick={handleSkipResume}>
+                <Text>跳过履历</Text>
+              </View>
+              <View className="btn-primary" onClick={handleNameConfirm}>
+                <Text>下一步</Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {step === 1 && (
+          <View className="action-card">
+            <Picker
+              mode="multiSelector"
+              range={dateColumns}
+              value={dateIdx}
+              onChange={handleDateChange}
+              onColumnChange={handleDateColumnChange}
+            >
+              <View className="picker-display">
+                <Text className="picker-text">{year}年 {month}月 {day}日</Text>
+                <Text className="picker-arrow">›</Text>
+              </View>
+            </Picker>
+            <View className="btn-row">
+              <View className="btn-primary btn-full" onClick={handleDateConfirm}>
+                <Text>下一步</Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {step === 2 && (
+          <View className="action-card">
+            <Picker
+              mode="multiSelector"
+              range={timeColumns}
+              value={timeIdx}
+              onChange={handleTimeChange}
+              onColumnChange={handleTimeColumnChange}
+            >
+              <View className="picker-display">
+                <Text className="picker-text">{String(hour).padStart(2, '0')}时 {String(minute).padStart(2, '0')}分</Text>
+                <Text className="picker-arrow">›</Text>
+              </View>
+            </Picker>
+            <View className="btn-row">
+              <View className="btn-primary btn-full" onClick={handleTimeConfirm}>
+                <Text>下一步</Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {step === 3 && (
+          <View className="action-card">
+            <Picker
+              mode="multiSelector"
+              range={regionColumns}
+              value={regionIdx}
+              onChange={handleRegionChange}
+              onColumnChange={handleRegionColumnChange}
+            >
+              <View className="picker-display">
+                <Text className={`picker-text${region[0] ? '' : ' picker-placeholder'}`}>
+                  {region[0] ? formatRegionLabel(region) : '请选择出生地点'}
+                </Text>
+                <Text className="picker-arrow">›</Text>
+              </View>
+            </Picker>
+            <View className="btn-row">
+              <View className="btn-primary btn-full" onClick={handleCityConfirm}>
+                <Text>下一步</Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {step === 4 && (
+          <View className="action-card">
+            <View className="btn-row">
+              <View className="btn-secondary" onClick={() => handleAstroChoose(false)}>
+                <Text>不用了</Text>
+              </View>
+              <View className="btn-primary" onClick={() => handleAstroChoose(true)}>
+                <Text>希望包含</Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {step >= 5 && (
+          <View className="action-card">
+            <View className="profile-category-form">
+              <Text className="category-form-title">档案分类</Text>
+              <View className="category-chip-row">
+                {DEFAULT_PROFILE_CATEGORIES.map(category => (
+                  <View
+                    key={category}
+                    className={`category-chip${profileCategory === category && !categoryDraft ? ' category-chip-active' : ''}`}
+                    onClick={() => {
+                      setProfileCategory(category);
+                      setCategoryDraft('');
+                    }}
+                  >
+                    <Text>{category}</Text>
+                  </View>
+                ))}
+              </View>
+              <Input
+                className="field-input category-input"
+                placeholder="或输入自定义分类，如朋友 / 家人 / 客户"
+                value={categoryDraft}
+                onInput={event => setCategoryDraft(event.detail.value)}
+              />
+            </View>
+            {error ? <Text className="error-text">{error}</Text> : null}
+            <Button
+              className={`submit-btn ${loading ? 'submit-btn-loading' : 'submit-btn-ready'}`}
+              disabled={loading}
+              onClick={handleSubmit}
+            >
+              {loading ? '计算星盘中...' : '开始解读'}
+            </Button>
+          </View>
+        )}
+      </View>
+
+      {visitStats && (
+        <View className="visit-stats">
+          <Text className="visit-stats-text">
+            已有 {visitStats.unique} 位朋友与木星相遇 · 累计来访 {visitStats.total} 次
+          </Text>
+        </View>
+      )}
     </View>
   );
 }

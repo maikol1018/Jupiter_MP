@@ -1,6 +1,7 @@
 // ============================================================
 // Cloudflare Worker — Gemini API 透传代理
 // 部署到 Cloudflare Workers (免费)，绕过地区限制
+// 静态音频文件通过 [assets] 配置自动托管在 /audio/ 下
 // ============================================================
 
 export default {
@@ -12,7 +13,7 @@ export default {
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type',
+          'Access-Control-Allow-Headers': 'Content-Type,X-Auth-Key',
         },
       });
     }
@@ -23,23 +24,127 @@ export default {
       return Response.json({ status: 'ok', worker: true });
     }
 
-    // Only allow POST /api/generate
-    if (request.method !== 'POST' || url.pathname !== '/api/generate') {
-      return Response.json({ error: 'Not Found' }, { status: 404 });
-    }
-
     // 验证请求来源（用 env 里的密钥）
     const authHeader = request.headers.get('X-Auth-Key');
     if (env.AUTH_KEY && authHeader !== env.AUTH_KEY) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // ─── 访问统计 /api/visit ───────────────────────────────
+    // GET：仅返回当前累计；POST { deviceId }：上报一次访问
+    if (url.pathname === '/api/visit') {
+      const cors = { 'Access-Control-Allow-Origin': '*' };
+      if (!env.VISITS) {
+        return Response.json(
+          { error: 'KV namespace VISITS 未绑定' },
+          { status: 500, headers: cors }
+        );
+      }
+      try {
+        if (request.method === 'GET') {
+          const total = parseInt((await env.VISITS.get('total')) || '0', 10);
+          const unique = parseInt((await env.VISITS.get('unique')) || '0', 10);
+          return Response.json({ total, unique }, { headers: cors });
+        }
+        if (request.method === 'POST') {
+          const body = await request.json().catch(() => ({}));
+          const deviceId = (body.deviceId || '').toString().slice(0, 64);
+
+          // 累计访问 +1
+          const total = parseInt((await env.VISITS.get('total')) || '0', 10) + 1;
+          await env.VISITS.put('total', String(total));
+
+          // 独立用户：deviceId 第一次出现才 +1
+          let unique = parseInt((await env.VISITS.get('unique')) || '0', 10);
+          if (deviceId) {
+            const key = `u:${deviceId}`;
+            const seen = await env.VISITS.get(key);
+            if (!seen) {
+              await env.VISITS.put(key, '1');
+              unique += 1;
+              await env.VISITS.put('unique', String(unique));
+            }
+          }
+          return Response.json({ total, unique }, { headers: cors });
+        }
+        return Response.json({ error: 'Method Not Allowed' }, { status: 405, headers: cors });
+      } catch (e) {
+        return Response.json(
+          { error: 'Visit counter error: ' + e.message },
+          { status: 500, headers: cors }
+        );
+      }
+    }
+    // ─────────────────────────────────────────────────────
+
+    // Only allow POST /api/generate
+    if (request.method !== 'POST' || url.pathname !== '/api/generate') {
+      return Response.json({ error: 'Not Found' }, { status: 404 });
+    }
+
     try {
       const body = await request.json();
-      const { prompt, systemInstruction, temperature } = body;
+      const { prompt, systemInstruction, temperature, provider, task } = body;
 
       if (!prompt) {
         return Response.json({ error: '缺少 prompt' }, { status: 400 });
+      }
+
+      if (provider === 'qwen') {
+        if (task !== 'daily') {
+          return Response.json(
+            { error: 'Qwen 目前只允许每日运程使用' },
+            { status: 400, headers: { 'Access-Control-Allow-Origin': '*' } }
+          );
+        }
+
+        const apiKey = env.QWEN_API_KEY || env.DASHSCOPE_API_KEY;
+        if (!apiKey) {
+          return Response.json(
+            { error: 'Qwen 未配置：请在 Worker secret 设置 QWEN_API_KEY 或 DASHSCOPE_API_KEY' },
+            { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } }
+          );
+        }
+
+        const qwenModel = env.QWEN_DAILY_MODEL || env.QWEN_MODEL || 'qwen-turbo';
+        const qwenBase = (env.QWEN_BASE_URL || 'https://dashscope.aliyuncs.com/compatible-mode/v1').replace(/\/+$/, '');
+        const messages = [];
+        if (systemInstruction) messages.push({ role: 'system', content: systemInstruction });
+        messages.push({ role: 'user', content: prompt });
+
+        const qwenRes = await fetch(`${qwenBase}/chat/completions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: qwenModel,
+            messages,
+            temperature: typeof temperature === 'number' ? temperature : 0.2,
+          }),
+        });
+
+        const qwenJson = await qwenRes.json().catch(() => ({}));
+        if (!qwenRes.ok || qwenJson.error) {
+          const detail = qwenJson.error?.message || qwenJson.message || `Qwen HTTP ${qwenRes.status}`;
+          return Response.json(
+            { error: 'Qwen API error: ' + detail },
+            { status: 502, headers: { 'Access-Control-Allow-Origin': '*' } }
+          );
+        }
+
+        const qwenText = qwenJson.choices?.[0]?.message?.content || '';
+        if (!qwenText) {
+          return Response.json(
+            { error: 'Qwen 返回空响应' },
+            { status: 502, headers: { 'Access-Control-Allow-Origin': '*' } }
+          );
+        }
+
+        return Response.json({ text: qwenText, provider: 'qwen', model: qwenModel }, {
+          headers: { 'Access-Control-Allow-Origin': '*' },
+        });
       }
 
       const API_KEY = env.GEMINI_API_KEY;

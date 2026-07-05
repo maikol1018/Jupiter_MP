@@ -2,8 +2,22 @@ name = "jupiter-relay"
 main = "src/index.js"
 compatibility_date = "2024-01-01"
 
+# Smart Placement: 让 Worker 靠近 Gemini API 运行，减少跨境链路抖动。
+[placement]
+mode = "smart"
+
+[assets]
+directory = "./public"
+
 [vars]
 GEMINI_MODEL = "gemini-3-flash-preview"
+QWEN_DAILY_MODEL = "qwen-plus-2025-07-28"
 AUTH_KEY = "jupiter-2026"
 
 # GEMINI_API_KEY 通过 wrangler secret 设置（不放在配置文件里）
+
+# 访问统计：先创建 KV namespace，再把 id 填到下面
+#   wrangler kv namespace create VISITS
+[[kv_namespaces]]
+binding = "VISITS"
+id = "d69ab8ed31b34e28857275c0df9e0359"

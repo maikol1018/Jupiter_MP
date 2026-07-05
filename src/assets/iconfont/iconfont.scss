@@ -1,0 +1,54 @@
+// ============================================
+// Iconfont 图标字体
+// 使用方法：
+//   1. 去 iconfont.cn 选择图标，下载字体包
+//   2. 解压到 src/assets/iconfont/raw/ 目录
+//   3. 运行 node scripts/gen-iconfont-scss.js
+//   4. 本文件会被自动覆盖
+// ============================================
+//
+// 需要的图标（在 iconfont.cn 搜索以下关键词）：
+//   icon-sun       → 搜索: 太阳 / sun
+//   icon-compass   → 搜索: 指南针 / compass
+//   icon-user      → 搜索: 用户 / user
+//   icon-building  → 搜索: 大厦 / building
+//   icon-rocket    → 搜索: 火箭 / rocket
+//   icon-handshake → 搜索: 握手 / handshake
+//   icon-briefcase → 搜索: 公文包 / briefcase
+//   icon-team      → 搜索: 团队 / team
+//   icon-chat      → 搜索: 聊天 / chat
+//   icon-lock      → 搜索: 锁 / lock
+//   icon-sparkle   → 搜索: 星光 / sparkle
+//   icon-star      → 搜索: 星 / star (用于 loading)
+//   icon-arrow-left → 搜索: 左箭头 / arrow-left
+//   icon-arrow-right → 搜索: 右箭头 / arrow-right
+
+// ── 临时方案：使用系统 Unicode 符号渲染 ──
+// 当你接入真实 iconfont 后，本文件会被脚本自动覆盖
+
+.iconfont {
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  display: inline-block;
+  text-align: center;
+}
+
+// 导航图标
+.icon-sun::before        { content: "\2600"; } // ☀
+.icon-compass::before    { content: "\2316"; } // ⌖
+.icon-user::before       { content: "\2B24"; } // ⬤
+
+// 功能图标
+.icon-building::before   { content: "\25A3"; } // ▣
+.icon-rocket::before     { content: "\25B2"; } // ▲
+.icon-handshake::before  { content: "\2726"; } // ✦
+.icon-briefcase::before  { content: "\25A0"; } // ■
+.icon-team::before       { content: "\2B22"; } // ⬢
+
+// UI 图标
+.icon-chat::before       { content: "\25EF"; } // ◯
+.icon-lock::before       { content: "\25C6"; } // ◆
+.icon-sparkle::before    { content: "\2728"; } // ✨
+.icon-star::before       { content: "\2726"; } // ✦
+.icon-arrow-left::before  { content: "\2039"; } // ‹
+.icon-arrow-right::before { content: "\203A"; } // ›

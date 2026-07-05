@@ -3,9 +3,16 @@ export default defineAppConfig({
     'pages/splash/index',
     'pages/input/index',
     'pages/main/index',
-    'pages/daily/index',
-    'pages/consult/index',
-    'pages/profile/index',
+  ],
+  subPackages: [
+    {
+      root: 'packageA',
+      pages: [
+        'pages/daily/index',
+        'pages/consult/index',
+        'pages/profile/index',
+      ],
+    },
   ],
   window: {
     backgroundTextStyle: 'light',
@@ -16,4 +23,5 @@ export default defineAppConfig({
   },
   style: 'v2',
   sitemapLocation: 'sitemap.json',
+  lazyCodeLoading: 'requiredComponents',
 });

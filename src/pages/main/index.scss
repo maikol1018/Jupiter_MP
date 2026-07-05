@@ -1,7 +1,11 @@
 .main-page {
   min-height: 100vh;
-  background: linear-gradient(160deg, #f5ece0, #fdf6ee);
-  padding: 32rpx;
+  box-sizing: border-box;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(201,123,110,0.22) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(232,168,130,0.18) 0%, transparent 50%),
+    linear-gradient(160deg, #f5ece0, #fdf6ee);
+  padding: 20rpx 32rpx 24rpx;
 }
 
 .main-loading {
@@ -9,7 +13,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(160deg, #f5ece0, #fdf6ee);
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(201,123,110,0.22) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(232,168,130,0.18) 0%, transparent 50%),
+    linear-gradient(160deg, #f5ece0, #fdf6ee);
 }
 
 .loading-text {
@@ -21,18 +28,18 @@
 .user-header {
   display: flex;
   align-items: center;
-  gap: 24rpx;
+  gap: 16rpx;
   background: rgba(255, 255, 255, 0.75);
   border: 1px solid rgba(185, 110, 80, 0.25);
   border-radius: 24rpx;
-  padding: 28rpx 32rpx;
-  margin-bottom: 32rpx;
+  padding: 20rpx 24rpx;
+  margin-bottom: 24rpx;
   box-shadow: 0 2px 12px rgba(180, 90, 60, 0.08);
 }
 
 .avatar-circle {
-  width: 88rpx;
-  height: 88rpx;
+  width: 60rpx;
+  height: 60rpx;
   background: linear-gradient(135deg, #c97b6e, #e8a882);
   border-radius: 50%;
   display: flex;
@@ -47,7 +54,7 @@
 }
 
 .user-info {
-  flex: 1;
+  flex: 1 1 0;
   min-width: 0;
 }
 
@@ -56,30 +63,42 @@
   font-size: 34rpx;
   font-weight: 700;
   color: #3d1c0a;
-  margin-bottom: 6rpx;
+  margin-bottom: 4rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-birth {
   display: block;
   font-size: 24rpx;
   color: rgba(61, 28, 10, 0.55);
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .edit-btn {
-  background: rgba(185, 110, 80, 0.12) !important;
+  background: #f6e6dc !important;
   border: 1px solid rgba(185, 110, 80, 0.45) !important;
   color: #7a3520 !important;
+  width: 170rpx !important;
+  min-width: 0 !important;
+  margin: 0 !important;
   font-size: 24rpx !important;
   border-radius: 999rpx !important;
-  padding: 10rpx 24rpx !important;
+  padding: 8rpx 0 !important;
+  line-height: 1.3 !important;
   flex-shrink: 0;
+  text-align: center;
 }
 
 /* 主菜单 */
 .menu-grid {
   display: flex;
-  gap: 20rpx;
-  margin-bottom: 40rpx;
+  gap: 16rpx;
+  margin-bottom: 30rpx;
 }
 
 .menu-item {
@@ -87,12 +106,15 @@
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(185, 110, 80, 0.22);
   border-radius: 20rpx;
-  padding: 32rpx 16rpx;
+  min-height: 128rpx;
+  padding: 20rpx 12rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12rpx;
+  justify-content: center;
+  gap: 8rpx;
   box-shadow: 0 2px 10px rgba(180, 90, 60, 0.06);
+  box-sizing: border-box;
 }
 
 .menu-icon {
@@ -100,41 +122,44 @@
 }
 
 .menu-label {
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: #3d1c0a;
   text-align: center;
 }
 
 /* 分组标题 */
 .section-title-row {
-  margin-bottom: 20rpx;
+  margin-bottom: 16rpx;
 }
 
 .section-title {
-  font-size: 28rpx;
+  font-size: 30rpx;
   color: rgba(61, 28, 10, 0.45);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0;
 }
 
 /* 子菜单 */
 .sub-menu-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20rpx;
+  gap: 16rpx;
 }
 
 .sub-menu-item {
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(185, 110, 80, 0.2);
   border-radius: 20rpx;
-  padding: 32rpx;
+  min-height: 148rpx;
+  padding: 22rpx 18rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16rpx;
+  justify-content: center;
+  gap: 10rpx;
   box-shadow: 0 2px 10px rgba(180, 90, 60, 0.06);
+  box-sizing: border-box;
 }
 
 .sub-menu-icon {
@@ -142,7 +167,218 @@
 }
 
 .sub-menu-label {
-  font-size: 28rpx;
+  font-size: 30rpx;
   color: #3d1c0a;
   font-weight: 600;
+}
+
+.profile-panel {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(185, 110, 80, 0.22);
+  border-radius: 24rpx;
+  padding: 22rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 2px 12px rgba(180, 90, 60, 0.08);
+}
+
+.profile-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 18rpx;
+}
+
+.profile-panel-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #3d1c0a;
+}
+
+.add-profile-btn {
+  margin: 0 !important;
+  padding: 8rpx 24rpx !important;
+  border-radius: 999rpx !important;
+  background: linear-gradient(135deg, #a94838 0%, #c96f5f 52%, #e08b62 100%) !important;
+  color: #fff !important;
+  border: 1rpx solid rgba(122, 53, 32, 0.18) !important;
+  font-size: 24rpx !important;
+  font-weight: 700 !important;
+  line-height: 1.4 !important;
+  box-shadow: 0 6rpx 16rpx rgba(169, 72, 56, 0.18);
+}
+
+.add-profile-btn::after {
+  border: none !important;
+}
+
+.category-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-bottom: 18rpx;
+}
+
+.category-filter-chip {
+  padding: 8rpx 20rpx;
+  border-radius: 999rpx;
+  background: rgba(185, 110, 80, 0.1);
+  border: 1px solid rgba(185, 110, 80, 0.2);
+}
+
+.category-filter-chip Text {
+  font-size: 24rpx;
+  color: #7a3520;
+}
+
+.category-filter-chip-active {
+  background: linear-gradient(135deg, #c97b6e, #e8a882);
+  border-color: transparent;
+}
+
+.category-filter-chip-active Text {
+  color: #fff;
+}
+
+.profile-record-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}
+
+.profile-record {
+  background: rgba(255, 255, 255, 0.68);
+  border: 1px solid rgba(185, 110, 80, 0.18);
+  border-radius: 20rpx;
+  padding: 18rpx;
+}
+
+.profile-record-active {
+  border-color: rgba(201, 123, 110, 0.6);
+  background: rgba(255, 248, 242, 0.9);
+}
+
+.profile-record-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+}
+
+.profile-record-main {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.profile-record-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 8rpx;
+}
+
+.profile-record-name {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #3d1c0a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-record-tag {
+  flex-shrink: 0;
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  background: rgba(201, 123, 110, 0.16);
+  color: #7a3520;
+  font-size: 22rpx;
+}
+
+.profile-record-meta {
+  display: block;
+  font-size: 24rpx;
+  color: rgba(61, 28, 10, 0.52);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-record-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  flex-shrink: 0;
+  max-width: 190rpx;
+}
+
+.profile-record-status {
+  font-size: 24rpx;
+  color: #c97b6e;
+  font-weight: 700;
+}
+
+.category-edit-btn {
+  margin: 0 !important;
+  padding: 6rpx 14rpx !important;
+  border-radius: 999rpx !important;
+  border: 1px solid rgba(185, 110, 80, 0.28) !important;
+  background: #fff7f0 !important;
+  color: #7a3520 !important;
+  font-size: 22rpx !important;
+  line-height: 1.3 !important;
+}
+
+.profile-delete-btn {
+  margin: 0 !important;
+  padding: 6rpx 14rpx !important;
+  border-radius: 999rpx !important;
+  border: 1px solid rgba(192, 79, 69, 0.24) !important;
+  background: #fff0ed !important;
+  color: #c04f45 !important;
+  font-size: 22rpx !important;
+  line-height: 1.3 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.profile-delete-btn::after {
+  border: none !important;
+}
+
+.category-editor {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-top: 14rpx;
+}
+
+.category-editor-input {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(185, 110, 80, 0.28);
+  border-radius: 16rpx;
+  padding: 12rpx 18rpx;
+  font-size: 26rpx;
+  color: #3d1c0a;
+  box-sizing: border-box;
+}
+
+.category-save-btn {
+  margin: 0 !important;
+  padding: 10rpx 24rpx !important;
+  border-radius: 999rpx !important;
+  background: linear-gradient(135deg, #a94838 0%, #c96f5f 52%, #e08b62 100%) !important;
+  color: #fff !important;
+  border: 1rpx solid rgba(122, 53, 32, 0.18) !important;
+  font-size: 24rpx !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  box-shadow: 0 6rpx 16rpx rgba(169, 72, 56, 0.18);
+}
+
+.category-save-btn::after {
+  border: none !important;
 }

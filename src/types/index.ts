@@ -33,6 +33,16 @@ export interface NatalData {
   };
 }
 
+export interface UserProfileRecord {
+  id: string;
+  category: string;
+  birthConfig: BirthData;
+  natalData: NatalData;
+  astroCalcVersion?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface TransitRequest {
   base_jd: number;
   target_date_str: string;

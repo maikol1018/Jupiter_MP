@@ -1,3 +1,4 @@
+export const REPORT_LOADING_HINT = '加载中请耐心等待2分钟';
 
 export const ZODIAC_SIGNS = [
   { name: 'Aries', nameCN: '白羊座', symbol: '♈', start: 0 },
